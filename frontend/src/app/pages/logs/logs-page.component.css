@@ -22,6 +22,35 @@ button {
   cursor: pointer;
 }
 
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.summary {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  border: 1px solid rgba(130, 148, 166, 0.2);
+  background: rgba(10, 20, 30, 0.4);
+  border-radius: 12px;
+  padding: 0.6rem 0.8rem;
+}
+
+.summary p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.summary strong {
+  color: var(--text-main);
+}
+
 .table-wrap {
   border: 1px solid rgba(130, 148, 166, 0.2);
   border-radius: 14px;
@@ -45,5 +74,14 @@ td {
 @media (max-width: 900px) {
   .filters {
     grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+
+  .summary {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
