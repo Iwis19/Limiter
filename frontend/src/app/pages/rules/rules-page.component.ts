@@ -44,7 +44,15 @@ export class RulesPageComponent implements OnInit {
   loadRules(): void {
     this.adminApiService.getStats().subscribe({
       next: (response) => {
-        this.ruleForm.patchValue(response.rules);
+        const rules = response.rules;
+        this.ruleForm.patchValue({
+          baseLimitPerMinute: rules.baseLimitPerMinute,
+          throttledLimitPerMinute: rules.throttledLimitPerMinute,
+          warnThreshold: rules.warnThreshold,
+          throttleThreshold: rules.throttleThreshold,
+          banThreshold: rules.banThreshold,
+          banMinutes: rules.banMinutes
+        });
       }
     });
   }
@@ -57,7 +65,8 @@ export class RulesPageComponent implements OnInit {
       return;
     }
 
-    this.adminApiService.updateRules(this.ruleForm.getRawValue()).subscribe({
+    const payload = this.ruleForm.getRawValue();
+    this.adminApiService.updateRules(payload).subscribe({
       next: () => {
         this.message = 'Rules updated successfully.';
       },

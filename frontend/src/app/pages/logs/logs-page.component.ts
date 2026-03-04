@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { AdminApiService } from '../../services/admin-api.service';
+import { RequestLogItem } from '../../services/admin-api.types';
 
 @Component({
   selector: 'app-logs-page',
@@ -12,7 +13,7 @@ import { AdminApiService } from '../../services/admin-api.service';
 })
 export class LogsPageComponent implements OnInit {
   loading = false;
-  rows: any[] = [];
+  rows: RequestLogItem[] = [];
 
   filterForm = this.formBuilder.group({
     principalId: [''],
@@ -36,7 +37,7 @@ export class LogsPageComponent implements OnInit {
       statusCode: values.statusCode || undefined
     }).subscribe({
       next: (response) => {
-        this.rows = response.items || [];
+        this.rows = response.items ?? [];
         this.loading = false;
       },
       error: () => {

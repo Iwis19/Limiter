@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { AdminApiService } from '../../services/admin-api.service';
+import { IncidentItem } from '../../services/admin-api.types';
 
 @Component({
   selector: 'app-incidents-page',
@@ -12,7 +13,7 @@ import { AdminApiService } from '../../services/admin-api.service';
 export class IncidentsPageComponent implements OnInit {
   loading = false;
   activeOnly = false;
-  rows: any[] = [];
+  rows: IncidentItem[] = [];
 
   constructor(private adminApiService: AdminApiService) {}
 
@@ -24,7 +25,7 @@ export class IncidentsPageComponent implements OnInit {
     this.loading = true;
     this.adminApiService.getIncidents(this.activeOnly).subscribe({
       next: (response) => {
-        this.rows = response.items || [];
+        this.rows = response.items ?? [];
         this.loading = false;
       },
       error: () => {

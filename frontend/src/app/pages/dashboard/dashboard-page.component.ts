@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { AdminApiService } from '../../services/admin-api.service';
+import { AdminStats } from '../../services/admin-api.types';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -11,7 +12,7 @@ import { AdminApiService } from '../../services/admin-api.service';
 })
 export class DashboardPageComponent implements OnInit {
   loading = true;
-  stats: any = null;
+  stats: AdminStats | null = null;
 
   constructor(private adminApiService: AdminApiService) {}
 
