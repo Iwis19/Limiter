@@ -1,172 +1,81 @@
-# Limitr
+﻿# Limitr 🛡️
 
-Limitr is a full-stack API protection demo that simulates a mini API gateway with:
-- API key authentication for `/api/**`
-- JWT admin authentication for `/admin/**`
-- Fixed-window rate limiting with `429` responses and standard rate-limit headers
-- Abuse scoring and automated enforcement (`OK`, `WARN`, `THROTTLED`, `TEMP_BANNED`)
-- Admin observability and live rule configuration
+API protection and abuse-detection platform with a Spring Boot backend and Angular admin dashboard for monitoring, rule tuning, and enforcement workflows.
 
-## Stack
-- Backend: Spring Boot + Spring Security + Spring Data JPA + PostgreSQL
-- Frontend: Angular (standalone components, router, guard, interceptor, reactive forms)
+---
+
+## Key Features
+
+1. **API Key Protection + Rate Limiting**
+   - `ApiProtectionFilter` guards `/api/**` routes with `X-API-KEY` authentication
+   - Per-principal fixed-window rate limiting with response headers (`X-RateLimit-*`, `Retry-After`)
+   - Supports dynamic limits based on enforcement state (base vs throttled)
+2. **Abuse Detection Layer**
+   - Scores principals from behavior signals (rate-limit abuse, failed auth, request spikes, resource enumeration)
+   - Uses rolling time windows and cooldown logic to reduce noise
+   - Feeds directly into enforcement decisions
+3. **Enforcement + Incident Handling**
+   - Automatic state progression (`OK` → `WARN` → `THROTTLED` → `TEMP_BANNED`)
+   - Temporary bans with expiration + manual ban/unban actions
+   - Incident logging with de-duplication to avoid repeated spam records
+4. **Admin Dashboard Interface**
+   - Angular SPA with login, dashboard, logs, incidents, and rules pages
+   - Live admin actions for filtering logs, reviewing incidents, and managing principals
+   - Rule editing UI for thresholds, ban duration, and request limits
+5. **Auth + Persistence**
+   - JWT-based admin authentication for `/admin/**`
+   - Spring Data JPA persistence for users, clients, incidents, logs, and rule config
+   - PostgreSQL primary datastore with H2 profile support for local/dev usage
+
+---
+
+## Tech Stack
+- **Java 21**
+- **Spring Boot** (Web, Security, Validation, JPA)
+- **PostgreSQL** + **H2**
+- **Angular 18** + **TypeScript**
+- **JWT** (`jjwt`)
+- Maven, RxJS
+
+---
 
 ## Project Structure
-- `backend/` Spring Boot API + static hosting for Angular production build
-- `frontend/` Angular admin dashboard
-- `scripts/sync-frontend-to-backend.ps1` helper to copy Angular build artifacts into Spring Boot static directory
-
-## Backend Features Implemented
-- `POST /auth/register`
-- `POST /auth/login` (returns JWT)
-- API key header auth: `X-API-KEY`
-- Rate limit per principal per minute
-- `429` responses include:
-  - `X-RateLimit-Limit`
-  - `X-RateLimit-Remaining`
-  - `Retry-After`
-- Abuse score over rolling 5 minutes:
-  - `+3` if rate limit exceeded
-  - `+2` if failed auth attempts > 10
-  - `+2` if sequential `/api/resource/{id}` enumeration detected
-  - `+1` if traffic spike detected
-- Escalation:
-  - score >= `THROTTLE_THRESHOLD` -> throttled limit
-  - score >= `BAN_THRESHOLD` -> temporary ban (default 15 min)
-- Persisted entities:
-  - `RequestLog`
-  - `Incident`
-  - `ApiClient`
-  - `RuleConfig`
-- Admin endpoints:
-  - `GET /admin/stats`
-  - `GET /admin/logs`
-  - `GET /admin/incidents`
-  - `PUT /admin/rules`
-  - `POST /admin/actions/ban`
-  - `POST /admin/actions/unban`
-- Demo protected endpoints:
-  - `GET /api/public/ping`
-  - `GET /api/data`
-  - `GET /api/resource/{id}`
-
-## Frontend Features Implemented
-- Login page
-- Dashboard overview page
-- Logs page with filters
-- Incidents page
-- Rules configuration page (includes manual ban/unban actions)
-- Angular Router
-- Route guard for admin pages
-- HTTP interceptor attaching JWT for `/admin/**`
-- Reactive forms
-- Modern security-console styling with dark mode toggle
-
-## Default Demo Credentials
-Configured in `backend/src/main/resources/application.yml` and seeded on startup:
-- Admin username: `admin`
-- Admin password: `admin12345`
-- API key: `demo-free-key`
-
-Override with env vars:
-- `DEMO_ADMIN_USERNAME`
-- `DEMO_ADMIN_PASSWORD`
-- `DEMO_API_KEY`
-
-## Local Development
-
-### 1) Start PostgreSQL
-Option A (recommended): from repo root
-```bash
-docker compose up -d postgres
-docker compose ps
-docker compose exec -T postgres pg_isready -U postgres -d limitr
+```text
+New folder/
+├── backend/
+│   ├── src/main/java/com/limitr/
+│   │   ├── config/               # Security + API protection filters + data seeding
+│   │   ├── controller/           # Auth, admin, demo API, SPA forward controllers
+│   │   ├── domain/               # JPA entities + enums
+│   │   ├── dto/                  # Request/response payload models
+│   │   ├── repository/           # Spring Data repositories
+│   │   ├── service/              # Rate limiting, detection, enforcement, auth
+│   │   └── LimitrApplication.java
+│   ├── src/main/resources/
+│   │   ├── application.yml       # Postgres + app config
+│   │   ├── application-h2.yml    # H2 local profile config
+│   │   └── static/               # Built frontend assets served by backend
+│   └── pom.xml
+├── frontend/
+│   ├── src/app/
+│   │   ├── pages/                # login, dashboard, logs, incidents, rules
+│   │   ├── services/             # auth + admin API services
+│   │   ├── guards/               # auth guard
+│   │   ├── interceptors/         # JWT auth header interceptor
+│   │   └── shell/                # authenticated app shell layout
+│   ├── package.json
+│   └── angular.json
+├── scripts/
+│   └── sync-frontend-to-backend.ps1
+└── docker-compose.yml
 ```
 
-Option B: use your own PostgreSQL and create database `limitr`.
+## Lessons Learned
+- Designing layered API defenses that combine limits, scoring, and enforcement
+- Balancing protection with operator visibility through logs and incidents
+- Full-stack workflow with aligned control and logics
+- Managing JWT auth flow on Angular 
+- Iterating on threshold tuning without breaking 
 
-Override DB connection with:
-- `DB_URL`
-- `DB_USERNAME`
-- `DB_PASSWORD`
-
-### 2) Start backend
-From `backend/`:
-```bash
-cd "c:\Users\User\Computer Science\New folder\backend"
-mvn spring-boot:run
-```
-
-Optional fallback (no PostgreSQL): run with H2 profile
-```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=h2
-```
-
-### 3) Start frontend
-From `frontend/`:
-```bash
-cd "c:\Users\User\Computer Science\New folder\frontend"
-npm install
-npm start
-```
-Angular dev server proxies `/auth`, `/api`, `/admin` to `http://localhost:8080`.
-
-## Production-style Serve (Spring Boot serves Angular)
-
-### 1) Build frontend
-From `frontend/`:
-```bash
-npm install
-npm run build
-```
-
-### 2) Copy Angular dist to backend static
-From repo root:
-```powershell
-./scripts/sync-frontend-to-backend.ps1
-```
-
-### 3) Run backend
-From `backend/`:
-```bash
-mvn spring-boot:run
-```
-
-Now Angular routes are served by Spring Boot with SPA fallback.
-
-## Quick Abuse Simulation
-
-### Call a protected endpoint successfully
-```bash
-curl -H "X-API-KEY: demo-free-key" http://localhost:8080/api/public/ping
-```
-
-### Trigger rate limiting
-```bash
-for i in {1..90}; do curl -s -o /dev/null -w "%{http_code}\n" -H "X-API-KEY: demo-free-key" http://localhost:8080/api/data; done
-```
-
-### Trigger sequential enumeration signal
-```bash
-for i in {1..12}; do curl -s -H "X-API-KEY: demo-free-key" http://localhost:8080/api/resource/$i > /dev/null; done
-```
-
-### Trigger failed auth signal
-```bash
-for i in {1..12}; do curl -s -o /dev/null -w "%{http_code}\n" -H "X-API-KEY: bad-key" http://localhost:8080/api/data; done
-```
-
-Then login to dashboard and inspect:
-- `/incidents`
-- `/logs`
-- `/dashboard`
-
-## Gemini UI Prompt (Suggested)
-Use this prompt in Gemini for iterative UI refinement of Angular templates/styles:
-
-```
-Design a modern enterprise security-console dashboard for an API abuse detection platform.
-Requirements: dark mode option, card-based metrics, logs table, incidents timeline/table,
-rules configuration form, minimalistic typography, subtle motion, professional SOC look,
-fully responsive desktop/mobile layout.
-```
+## License
+MIT
