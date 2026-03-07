@@ -20,7 +20,7 @@ export class ShellComponent implements OnInit {
   darkMode = localStorage.getItem('limitr_dark') === '1';
   readonly topNav: TopNavItem[] = [
     { label: 'OVERVIEW', route: '/dashboard' },
-    { label: 'TRAFFIC', route: '/guardian' },
+    { label: 'TRAFFIC', route: '/traffic' },
     { label: 'RULES', route: '/rules' },
     { label: 'LOGS', route: '/logs' },
     { label: 'INCIDENTS', route: '/incidents' }

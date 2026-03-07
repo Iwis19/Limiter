@@ -11,15 +11,15 @@ interface ProtectionLayer {
 }
 
 @Component({
-  selector: 'app-guardian-page',
+  selector: 'app-traffic-page',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  templateUrl: './guardian-page.component.html',
-  styleUrls: ['./guardian-page.component.css']
+  templateUrl: './traffic-page.component.html',
+  styleUrls: ['./traffic-page.component.css']
 })
-export class GuardianPageComponent implements OnInit {
-  private readonly layerStorageKey = 'limitr_guardian_layers';
-  private readonly profileStorageKey = 'limitr_guardian_profile';
+export class TrafficPageComponent implements OnInit {
+  private readonly layerStorageKey = 'limitr_traffic_layers';
+  private readonly profileStorageKey = 'limitr_traffic_profile';
   private readonly defaultLayers: ProtectionLayer[] = [
     { label: 'IP Rotation Check', active: true },
     { label: 'Geo-Fencing', active: true },
@@ -212,7 +212,7 @@ export class GuardianPageComponent implements OnInit {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `guardian-incidents-${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+    link.download = `traffic-incidents-${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   }
