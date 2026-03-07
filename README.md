@@ -45,6 +45,70 @@ Most of the development began locally since the summer, but more implementations
 
 ---
 
+## Setup
+
+### Prerequisites
+- **Java 21**
+- **Node.js 20+**
+- **npm**
+- **Docker Desktop** for PostgreSQL
+- **Maven**
+
+### 1. Start PostgreSQL
+From the repository root:
+
+```powershell
+docker compose up -d postgres
+```
+
+Default database values:
+- database: `limitr`
+- username: `postgres`
+- password: `postgres`
+
+### 2. Start the backend
+From `backend/`:
+
+```powershell
+mvn spring-boot:run
+```
+Backend URL:
+- `http://localhost:8080`
+
+### 3. Start the frontend
+From `frontend/`:
+
+```powershell
+npm install
+npm start
+```
+Frontend URL:
+- `http://localhost:4200`
+
+### 4. Use the seeded demo credentials
+Admin login:
+- username: `admin`
+- password: `admin12345`
+
+Demo API client:
+- principal id: `demo-client`
+- API key: `demo-free-key`
+
+### Optional H2 mode
+If you want to run the backend without PostgreSQL:
+
+```powershell
+mvn spring-boot:run "-Dspring-boot.run.profiles=h2"
+```
+
+### Frontend production build
+```powershell
+cd frontend
+npm run build
+```
+
+---
+
 ## Project Structure
 ```text
 New folder/
