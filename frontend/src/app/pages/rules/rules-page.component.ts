@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminApiService } from '../../services/admin-api.service';
 
@@ -70,8 +71,8 @@ export class RulesPageComponent implements OnInit {
       next: () => {
         this.message = 'Rules updated successfully.';
       },
-      error: () => {
-        this.error = 'Unable to update rules.';
+      error: (error: HttpErrorResponse) => {
+        this.error = this.extractErrorMessage(error, 'Unable to update rules.');
       }
     });
   }
@@ -89,8 +90,8 @@ export class RulesPageComponent implements OnInit {
       next: () => {
         this.message = 'Principal banned.';
       },
-      error: () => {
-        this.error = 'Unable to ban principal.';
+      error: (error: HttpErrorResponse) => {
+        this.error = this.extractErrorMessage(error, 'Unable to ban principal.');
       }
     });
   }
@@ -108,9 +109,14 @@ export class RulesPageComponent implements OnInit {
       next: () => {
         this.message = 'Principal unbanned.';
       },
-      error: () => {
-        this.error = 'Unable to unban principal.';
+      error: (error: HttpErrorResponse) => {
+        this.error = this.extractErrorMessage(error, 'Unable to unban principal.');
       }
     });
+  }
+
+  private extractErrorMessage(error: HttpErrorResponse, fallback: string): string {
+    const message = error.error?.error;
+    return typeof message === 'string' && message.trim() ? message : fallback;
   }
 }
