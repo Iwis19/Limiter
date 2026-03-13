@@ -19,12 +19,12 @@ spring:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:limitr-demo-secret-key-change-this-in-production-1234567890}
+    secret: ${JWT_SECRET:limitr-local-secret-key-change-this-in-production-1234567890}
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
-  demo:
+  seed:
     admin:
-      username: ${DEMO_ADMIN_USERNAME:admin}
-      password: ${DEMO_ADMIN_PASSWORD:admin12345}
+      username: ${SEED_ADMIN_USERNAME:admin}
+      password: ${SEED_ADMIN_PASSWORD:admin12345}
     client:
-      principal-id: ${DEMO_CLIENT_PRINCIPAL_ID:demo-client}
-      api-key: ${DEMO_API_KEY:demo-free-key}
+      principal-id: ${SEED_CLIENT_PRINCIPAL_ID:local-client}
+      api-key: ${SEED_API_KEY:local-free-key}

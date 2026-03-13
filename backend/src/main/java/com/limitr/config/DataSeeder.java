@@ -22,17 +22,17 @@ public class DataSeeder implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final ApiClientService apiClientService;
 
-    @Value("${app.demo.admin.username:admin}")
-    private String demoAdminUsername;
+    @Value("${app.seed.admin.username:admin}")
+    private String seedAdminUsername;
 
-    @Value("${app.demo.admin.password:admin12345}")
-    private String demoAdminPassword;
+    @Value("${app.seed.admin.password:admin12345}")
+    private String seedAdminPassword;
 
-    @Value("${app.demo.client.principal-id:demo-client}")
-    private String demoPrincipalId;
+    @Value("${app.seed.client.principal-id:local-client}")
+    private String seedPrincipalId;
 
-    @Value("${app.demo.client.api-key:demo-free-key}")
-    private String demoApiKey;
+    @Value("${app.seed.client.api-key:local-free-key}")
+    private String seedApiKey;
 
     public DataSeeder(
         RuleService ruleService,
@@ -50,18 +50,17 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) {
         ruleService.getCurrentRule();
 
-        if (adminUserRepository.findByUsername(demoAdminUsername).isEmpty()) {
+        if (adminUserRepository.findByUsername(seedAdminUsername).isEmpty()) {
             AdminUser user = new AdminUser();
-            user.setUsername(demoAdminUsername);
-            user.setPasswordHash(passwordEncoder.encode(demoAdminPassword));
+            user.setUsername(seedAdminUsername);
+            user.setPasswordHash(passwordEncoder.encode(seedAdminPassword));
             user.setRole("ADMIN");
             adminUserRepository.save(user);
         }
 
-        apiClientService.createIfAbsent(demoPrincipalId, demoApiKey, ClientTier.FREE);
+        apiClientService.createIfAbsent(seedPrincipalId, seedApiKey, ClientTier.FREE);
 
-        log.info("Limitr demo admin username: {}", demoAdminUsername);
-        log.info("Limitr demo admin password: {}", demoAdminPassword);
-        log.info("Limitr demo API key: {}", demoApiKey);
+        log.info("Limitr seeded admin username: {}", seedAdminUsername);
+        log.info("Limitr local credentials and API key are configured.");
     }
 }

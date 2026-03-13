@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
-public class DemoApiController {
+public class SampleApiController {
 
     @GetMapping("/public/ping")
     public Map<String, Object> ping() {
@@ -22,7 +22,7 @@ public class DemoApiController {
     @GetMapping("/data")
     public Map<String, Object> data() {
         return Map.of(
-            "service", "Limitr Demo API",
+            "service", "Limitr Sample API",
             "status", "ok",
             "timestamp", Instant.now(),
             "data", Map.of("sensitive", false, "sample", "secure-data-stream")
