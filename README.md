@@ -79,14 +79,19 @@ npm start
 Frontend URL:
 - `http://localhost:4200`
 
-### 4. Use the seeded demo credentials
+### 4. Use the seeded local credentials
 Admin login:
 - username: `admin`
 - password: `admin12345`
 
-Demo API client:
-- principal id: `demo-client`
-- API key: `demo-free-key`
+Seeded API client:
+- principal id: `local-client`
+- API key: `local-free-key`
+
+These values come from the `SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD`,
+`SEED_CLIENT_PRINCIPAL_ID`, and `SEED_API_KEY` environment variables. The
+backend seeds them for local use and only logs the non-sensitive admin
+username at startup.
 
 ### Optional H2 mode
 If you want to run the backend without PostgreSQL:
@@ -108,7 +113,7 @@ New folder/
 ├── backend/
 │   ├── src/main/java/com/limitr/
 │   │   ├── config/               # Security + API protection filters + data seeding
-│   │   ├── controller/           # Auth, admin, demo API, SPA forward controllers
+│   │   ├── controller/           # Auth, admin, sample API, SPA forward controllers
 │   │   ├── domain/               # JPA entities + enums
 │   │   ├── dto/                  # Request/response payload models
 │   │   ├── repository/           # Spring Data repositories
