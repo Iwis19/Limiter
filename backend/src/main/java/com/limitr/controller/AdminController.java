@@ -12,7 +12,6 @@ import jakarta.validation.Valid;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -74,15 +73,9 @@ public class AdminController {
 
     @GetMapping("/incidents")
     public Map<String, Object> incidents(@RequestParam(defaultValue = "false") boolean activeOnly) {
-        List<Incident> items;
-        if (activeOnly) {
-            Set<String> activePrincipals = enforcementService.getActiveBans().keySet();
-            items = activePrincipals.isEmpty()
-                ? List.of()
-                : incidentRepository.findByPrincipalIdInAndExpiresAtAfterOrderByTimestampDesc(activePrincipals, Instant.now());
-        } else {
-            items = incidentRepository.findTop200ByOrderByTimestampDesc();
-        }
+        List<Incident> items = activeOnly
+            ? incidentRepository.findActiveBanStates(Instant.now())
+            : incidentRepository.findTop200ByOrderByTimestampDesc();
         return Map.of("items", items);
     }
 
