@@ -6,6 +6,7 @@ import com.limitr.domain.enums.EnforcementState;
 import com.limitr.repository.IncidentRepository;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,8 +61,7 @@ public class EnforcementService {
     }
 
     public boolean isTempBanned(String principalId) {
-        Instant expiresAt = temporaryBans.get(principalId);
-        return expiresAt != null && expiresAt.isAfter(Instant.now());
+        return getBanExpiry(principalId).isAfter(Instant.now());
     }
 
     public void recordRateLimitIncident(String principalId, int score) {
@@ -94,15 +94,20 @@ public class EnforcementService {
     }
 
     public long activeBanCount() {
-        Instant now = Instant.now();
-        temporaryBans.entrySet().removeIf(entry -> entry.getValue().isBefore(now));
-        return temporaryBans.size();
+        return getActiveBans().size();
     }
 
     public Map<String, Instant> getActiveBans() {
         Instant now = Instant.now();
         temporaryBans.entrySet().removeIf(entry -> entry.getValue().isBefore(now));
-        return new HashMap<>(temporaryBans);
+        Map<String, Instant> activeBans = new LinkedHashMap<>();
+        for (Incident incident : incidentRepository.findActiveBanStates(now)) {
+            if (incident.getExpiresAt() != null) {
+                activeBans.put(incident.getPrincipalId(), incident.getExpiresAt());
+            }
+        }
+        activeBans.putAll(new HashMap<>(temporaryBans));
+        return activeBans;
     }
 
     private void clearExpiredBan(String principalId) {
@@ -110,6 +115,21 @@ public class EnforcementService {
         if (expiresAt != null && expiresAt.isBefore(Instant.now())) {
             temporaryBans.remove(principalId);
         }
+    }
+
+    private Instant getBanExpiry(String principalId) {
+        clearExpiredBan(principalId);
+
+        Instant inMemoryExpiry = temporaryBans.get(principalId);
+        if (inMemoryExpiry != null) {
+            return inMemoryExpiry;
+        }
+
+        return incidentRepository.findTopByPrincipalIdOrderByTimestampDesc(principalId)
+            .filter(incident -> "TEMP_BANNED".equals(incident.getActionTaken()))
+            .map(Incident::getExpiresAt)
+            .filter(expiresAt -> expiresAt != null && expiresAt.isAfter(Instant.now()))
+            .orElse(Instant.EPOCH);
     }
 
     private void logIncident(
